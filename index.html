@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="sv">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Matjakten Karlstad</title>
+<style>
+:root{--g:#216b3a;--bg:#f5f7f5;--card:#fff;--b:#dfe7e1;--m:#68736b;--t:#172019}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--t);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+.wrap{max-width:1000px;margin:auto;padding:18px 16px 48px}.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}.logo{font-size:24px;font-weight:850;color:var(--g)}.place{font-size:14px;color:var(--m)}
+.hero{background:linear-gradient(135deg,#e5f4e8,#f9fbf9);border:1px solid #d3e6d7;border-radius:24px;padding:26px;margin-bottom:16px}h1{margin:0 0 8px;font-size:32px}.hero p{margin:0;color:var(--m)}
+.card{background:var(--card);border:1px solid var(--b);border-radius:18px;padding:18px;margin-bottom:16px;box-shadow:0 8px 30px rgba(20,50,30,.06)}
+.search{display:flex;gap:9px}.input{width:100%;padding:13px 14px;border:1px solid var(--b);border-radius:12px;font-size:16px;outline:none}.input:focus{border-color:var(--g);box-shadow:0 0 0 3px #e1f0e4}
+button{border:0;border-radius:11px;padding:12px 16px;font-weight:750;cursor:pointer}.primary{background:var(--g);color:white}.secondary{background:#eef2ef;color:var(--t)}
+.suggestions,.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:11px}.chip{background:#f1f5f2;border:1px solid var(--b);border-radius:999px;padding:8px 11px;font-size:14px}.chip button{padding:0 0 0 7px;background:none;color:var(--m);font-size:17px}
+.actions{display:flex;gap:9px;margin-top:14px}.actions button{flex:1}.status{margin-top:10px;font-size:14px;color:var(--m)}.error{background:#fff1f1;border:1px solid #efcaca;color:#8a2d2d;padding:12px;border-radius:12px}
+.summary{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.stat{background:#f7faf7;border:1px solid var(--b);border-radius:13px;padding:13px}.stat small{color:var(--m)}.stat b{display:block;font-size:22px;margin-top:3px}
+.store{border:1px solid var(--b);border-radius:16px;padding:15px;margin-top:10px}.store.best{border:2px solid var(--g);background:#fbfffb}.storehead{display:flex;justify-content:space-between;gap:10px}.store h3{margin:0 0 4px}.meta{font-size:13px;color:var(--m)}.price{font-size:25px;font-weight:800;white-space:nowrap}.badge{display:inline-block;background:#dff2e4;color:var(--g);border-radius:999px;padding:4px 8px;font-size:12px;font-weight:800}
+.rows{margin-top:11px;border-top:1px solid var(--b)}.row{display:flex;justify-content:space-between;gap:10px;padding:9px 0;border-bottom:1px solid #edf1ee;font-size:14px}.row small{display:block;color:var(--m)}.missing{color:#9b5a25}
+.note{background:#f7faf7;border:1px solid var(--b);padding:12px;border-radius:12px;font-size:13px;color:var(--m);margin-top:12px}.hidden{display:none}footer{text-align:center;color:var(--m);font-size:12px;margin-top:24px}
+@media(max-width:650px){h1{font-size:27px}.search{flex-direction:column}.summary{grid-template-columns:1fr}.storehead{align-items:flex-start}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header><div class="logo">🛒 Matjakten</div><div class="place">📍 Karlstad</div></header>
+<section class="hero"><h1>Hitta billigaste matkassen i Karlstad.</h1><p>Välj dina varor. Matjakten jämför butikernas publicerade priser och visar den billigaste kompletta kassen.</p></section>
+
+<section class="card">
+<div class="search"><input id="q" class="input" placeholder="Sök t.ex. mjölk, smör, kaffe..." autocomplete="off"><button class="primary" id="add">Lägg till</button></div>
+<div id="suggestions" class="suggestions"></div><div id="chips" class="chips"></div>
+<div class="actions"><button class="primary" id="compare">Jämför priser</button><button class="secondary" id="clear">Töm listan</button></div>
+<div id="status" class="status"></div>
+</section>
+
+<section id="results" class="card hidden">
+<div class="summary"><div class="stat"><small>Billigast komplett kasse</small><b id="best">–</b></div><div class="stat"><small>Besparing</small><b id="saving">–</b></div><div class="stat"><small>Varor</small><b id="count">–</b></div></div>
+<div id="stores"></div>
+<div class="note">Priserna hämtas via Matjaktens backend från Primats API. Prisdata samlas in dagligen från kedjornas publicerade butikspriser. Medlems- och flerköpspriser visas separat när de finns.</div>
+</section>
+<footer>Matjakten Karlstad · Prisdata: Primat · Detta är en testversion.</footer>
+</div>
+<script>
+const API_BASE="https://DIN-WORKER.workers.dev/api";
+let cart=JSON.parse(localStorage.getItem("matjakten-karlstad")||"[]");
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const money=n=>typeof n==="number"?n.toLocaleString("sv-SE",{minimumFractionDigits:2,maximumFractionDigits:2})+" kr":"–";
+
+function save(){localStorage.setItem("matjakten-karlstad",JSON.stringify(cart));render()}
+function render(){ $("chips").innerHTML=cart.map((x,i)=>`<div class="chip">${esc(x.name)}<button onclick="removeItem(${i})">×</button></div>`).join("")}
+function removeItem(i){cart.splice(i,1);save()}
+$("clear").onclick=()=>{cart=[];save();$("results").classList.add("hidden")}
+async function search(q){
+ const r=await fetch(`${API_BASE}/search?q=${encodeURIComponent(q)}`);
+ if(!r.ok)throw new Error("Kunde inte hämta produkter.");
+ return r.json();
+}
+function add(p){if(!cart.some(x=>x.key===p.key)){cart.push(p);save()}$("q").value="";$("suggestions").innerHTML=""}
+$("q").addEventListener("input",async e=>{
+ const q=e.target.value.trim();$("suggestions").innerHTML="";if(q.length<2)return;
+ try{const j=await search(q);(j.products||[]).slice(0,8).forEach(p=>{const b=document.createElement("button");b.className="secondary";b.textContent="+ "+p.name+(p.package?" · "+p.package:"");b.onclick=()=>add(p);$("suggestions").appendChild(b)})}catch(_){}
+});
+$("add").onclick=async()=>{const q=$("q").value.trim();if(!q)return;try{const j=await search(q);if(j.products?.[0])add(j.products[0]);else alert("Hittade ingen vara.")}catch(e){alert(e.message)}};
+
+$("compare").onclick=async()=>{
+ if(!cart.length){alert("Lägg till minst en vara först.");return}
+ $("status").textContent="Jämför Karlstads butiker...";
+ $("results").classList.add("hidden");
+ try{
+  const r=await fetch(`${API_BASE}/compare`,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({items:cart})});
+  const j=await r.json();if(!r.ok)throw new Error(j.message||"Jämförelsen misslyckades.");
+  const rows=j.stores||[];if(!rows.length)throw new Error("Ingen komplett kasse kunde räknas ut.");
+  $("best").textContent=money(rows[0].total);$("saving").textContent=money(rows[rows.length-1].total-rows[0].total);$("count").textContent=cart.length;
+  $("stores").innerHTML=rows.map((s,i)=>`<div class="store ${i===0?"best":""}">
+   <div class="storehead"><div><h3>${i===0?"🏆 ":""}${esc(s.name)}</h3><div class="meta">${i===0?'<span class="badge">BILLIGAST</span>':esc(s.address||"Karlstad")}</div></div><div class="price">${money(s.total)}</div></div>
+   <div class="rows">${s.items.map(x=>`<div class="row"><span>${esc(x.name)}<small>${esc(x.package||"")}${x.member!=null?" · medlemspris "+money(x.member):""}${x.multiprice?" · "+x.multiprice.quantity+" för "+money(x.multiprice.price)+" /st":""}</small></span><strong>${money(x.price)}</strong></div>`).join("")}</div>
+  </div>`).join("");
+  $("results").classList.remove("hidden");$("status").textContent=`Klart. ${rows.length} butiker hade hela inköpslistan.`;
+ }catch(e){$("status").innerHTML=`<div class="error">${esc(e.message)}</div>`}
+};
+render();
+</script>
+</body></html>
