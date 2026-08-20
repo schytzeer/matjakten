@@ -1,0 +1,249 @@
+<!doctype html>
+<html lang="sv">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Matjakten Karlstad – jämför matpriser</title>
+<meta name="description" content="Beskriv vad du vill köpa och Matjakten hittar billigaste lämpliga produkten i varje butik i Karlstad.">
+<style>
+:root{--g:#176b3a;--gl:#e5f3e9;--bg:#f5f7f5;--b:#dfe7e1;--m:#69746d;--dark:#172019}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--dark);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif}
+.w{max-width:1050px;margin:auto;padding:18px 16px 60px}.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}
+.logo{font-size:25px;font-weight:850;color:var(--g)}.muted{color:var(--m)}
+.hero{background:linear-gradient(135deg,#e5f3e9,#fff);border:1px solid #d3e6d8;border-radius:22px;padding:25px;margin-bottom:16px}
+h1{font-size:34px;line-height:1.08;margin:0 0 8px}.hero p{margin:0;color:var(--m)}
+.card{background:#fff;border:1px solid var(--b);border-radius:18px;padding:19px;margin-bottom:16px;box-shadow:0 8px 25px rgba(22,48,31,.05)}
+h2{font-size:20px;margin:0 0 11px}.tools,.actions{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
+.btn{border:0;border-radius:11px;padding:12px 16px;font-weight:800;cursor:pointer}.primary{background:var(--g);color:#fff}.secondary{background:#edf2ee;color:var(--dark)}
+.stores{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}.store{display:flex;gap:8px;align-items:flex-start;border:1px solid var(--b);border-radius:12px;padding:10px;background:#fff}
+.store input{accent-color:var(--g);margin-top:3px}.store small{display:block;color:var(--m);margin-top:3px}
+.formgrid{display:grid;grid-template-columns:1fr 180px 130px;gap:9px}.input{width:100%;padding:13px 14px;border:1px solid var(--b);border-radius:12px;font-size:16px;background:#fff;outline:none}
+.input:focus{border-color:var(--g);box-shadow:0 0 0 3px var(--gl)}.hint{font-size:13px;color:var(--m);margin:9px 0}
+.suggestions{display:flex;flex-direction:column;gap:7px;margin-top:10px}.suggest{border:1px solid var(--b);border-radius:12px;padding:11px;text-align:left;background:#fff}
+.suggest b{display:block}.suggest small{display:block;color:var(--m);margin-top:3px}
+.cart{display:flex;flex-direction:column;gap:7px;margin-top:13px}.item{display:grid;grid-template-columns:1fr auto auto;gap:10px;align-items:center;border:1px solid var(--b);border-radius:12px;padding:11px}
+.item small{display:block;color:var(--m);margin-top:3px}.qty{display:flex;align-items:center;gap:5px}.qty button{border:0;background:#edf2ee;border-radius:7px;width:29px;height:29px;font-weight:800}
+.remove{border:0;background:none;color:var(--m);font-size:20px;cursor:pointer}.member{margin-top:12px;padding:11px;border:1px solid var(--b);border-radius:12px;background:#f8faf8}
+.actions .btn{flex:1;min-width:180px}.status{margin-top:10px;font-size:13px;color:var(--m)}
+.error{background:#fff0f0;border:1px solid #efc9c9;color:#a52f2f;padding:11px;border-radius:11px}
+.note{background:#f4faf5;border:1px solid #d8e8db;border-radius:12px;padding:11px;font-size:13px;color:#405046;margin-top:12px}
+.summary{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}.stat{border:1px solid var(--b);border-radius:12px;padding:12px}.stat small{color:var(--m)}.stat b{display:block;font-size:23px;margin-top:3px}
+.result{border:1px solid var(--b);border-radius:15px;padding:14px;margin-top:10px;background:#fff}.result.best{border:2px solid var(--g)}
+.rh{display:flex;justify-content:space-between;gap:12px}.rh h3{margin:0 0 4px;font-size:18px}.price{font-size:25px;font-weight:850;white-space:nowrap}
+.badge{display:inline-block;background:var(--gl);color:var(--g);padding:4px 8px;border-radius:999px;font-size:11px;font-weight:850}
+.rows{border-top:1px solid var(--b);margin-top:10px}.row{display:grid;grid-template-columns:1fr auto;gap:12px;padding:10px 0;border-bottom:1px solid #edf1ee;font-size:14px}
+.row small{display:block;color:var(--m);margin-top:3px}.row strong{white-space:nowrap}.match{font-size:12px;color:var(--g);margin-top:3px}
+.hidden{display:none}footer{text-align:center;color:var(--m);font-size:12px;margin-top:25px}footer a{color:var(--g)}
+@media(max-width:720px){h1{font-size:29px}.formgrid{grid-template-columns:1fr}.stores{grid-template-columns:1fr}.summary{grid-template-columns:1fr}.rh{align-items:flex-start}.price{font-size:22px}}
+</style>
+</head>
+<body>
+<div class="w">
+<header class="top"><div class="logo">🛒 Matjakten</div><div class="muted">📍 Karlstad</div></header>
+<section class="hero"><h1>Hitta billigaste matkassen i Karlstad.</h1><p>Beskriv vad du vill köpa – Matjakten väljer den billigaste lämpliga produkten i varje butik.</p></section>
+
+<section class="card">
+<h2>1. Välj butiker</h2>
+<div class="tools"><button class="btn secondary" id="all">Välj alla</button><button class="btn secondary" id="none">Rensa</button></div>
+<div id="stores" class="stores">Hämtar Karlstadsbutiker…</div><div id="storeStatus" class="status"></div>
+</section>
+
+<section class="card">
+<h2>2. Vad vill du köpa?</h2>
+<div class="formgrid">
+<input id="name" class="input" placeholder="t.ex. Krossade tomater">
+<input id="amount" class="input" inputmode="decimal" placeholder="t.ex. 500">
+<select id="unit" class="input"><option value="g">gram</option><option value="kg">kg</option><option value="ml">ml</option><option value="l">liter</option><option value="st">st</option></select>
+</div>
+<div class="hint">Du väljer ett inköpsönskemål, inte en specifik produkt. Matjakten kan därför välja olika varumärken i olika butiker.</div>
+<button class="btn primary" id="add">Lägg till i inköpslistan</button>
+<div id="suggestions" class="suggestions"></div>
+<div class="note"><b>Exempel:</b> "Krossade tomater · 500 g" kan bli Garant hos Willys, ICA:s egna hos ICA och en annan motsvarande 500 g-produkt hos Coop.</div>
+<div id="cart" class="cart"></div>
+
+<div class="member"><label><input type="checkbox" id="member"> Jag har medlemskap</label><div class="hint">Medlemspris används när det finns ett aktuellt medlemspris.</div></div>
+<div class="actions"><button class="btn primary" id="compare">Jämför min matkasse</button><button class="btn secondary" id="clear">Töm listan</button></div>
+<div id="status" class="status"></div>
+</section>
+
+<section id="results" class="card hidden">
+<div class="summary"><div class="stat"><small>Billigaste hela kassen</small><b id="best">–</b></div><div class="stat"><small>Besparing mot dyrast</small><b id="save">–</b></div><div class="stat"><small>Antal varor</small><b id="count">–</b></div></div>
+<div id="list"></div>
+<div class="note"><b>Så matchas varorna:</b> Matjakten söker i alla valda butiker. För varje butik väljs en relevant produkt, där rätt mängd prioriteras före pris och billigaste lämpliga produkt väljs inom samma mängdklass. Om exakt mängd saknas kan en annan förpackningsstorlek användas som reserv.</div>
+</section>
+<footer>Matjakten Karlstad v12 · prisdata via <a href="https://primat.nu/api" target="_blank" rel="noopener">Primat</a></footer>
+</div>
+
+<script>
+const API="https://matjakten-api.simon-schytzer.workers.dev/api";
+const CART_KEY="matjakten-cart-v12",STORE_KEY="matjakten-stores-v12",STORE_CACHE="matjakten-store-cache-v12";
+let cart=JSON.parse(localStorage.getItem(CART_KEY)||"[]"),stores=[],selected=JSON.parse(localStorage.getItem(STORE_KEY)||"[]");
+const $=id=>document.getElementById(id), esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const money=v=>Number(v).toLocaleString("sv-SE",{minimumFractionDigits:2,maximumFractionDigits:2})+" kr", storeKey=s=>`${s.chain}:${s.store_id}`;
+function saveCart(){localStorage.setItem(CART_KEY,JSON.stringify(cart));renderCart()} function saveStores(){localStorage.setItem(STORE_KEY,JSON.stringify(selected))}
+function normalize(s){return String(s||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z0-9åäö\s]/g," ").replace(/\s+/g," ").trim()}
+function grams(amount,unit){const n=Number(amount);if(!Number.isFinite(n))return null;if(unit==="kg"||unit==="l")return n*1000;if(unit==="g"||unit==="ml")return n;return null}
+function productAmount(p){const n=Number(p.amount);if(!Number.isFinite(n))return null;const u=String(p.unit||"").toLowerCase();if(u==="kg"||u==="l")return n*1000;if(u==="g"||u==="ml")return n;return null}
+function words(text){const stop=new Set(["och","med","för","den","det","en","ett","av","i","på","the"]);return normalize(text).split(" ").filter(x=>x.length>2&&!stop.has(x))}
+function productText(p){return normalize([p.name,p.brand,p.package,p.category].filter(Boolean).join(" "))}
+function categoryText(p){return normalize([p.category,p.name].filter(Boolean).join(" "))}
+
+// Category-aware matching. Generic word overlap alone is intentionally NOT enough:
+// e.g. "mjölk" must never match "mjölkersättning", and "smör" must not match rapso-/smörolja.
+function productFamily(item,p){
+  const q=normalize(item.name), n=productText(p), c=categoryText(p);
+  if(q.includes("mjolk")){
+    if(/mjolkersattning|modersmjolksersattning|baby|spadbarn|valling|havre|soja|mandel|kokos|dryck|shake|protein/.test(n)) return false;
+    return /mjolk/.test(n) || /mjolk/.test(c);
+  }
+  if(q.includes("smor")){
+    if(/raps|olja|margarin|bredbart|matfett|flytande|smörolja|smorolja/.test(n)) return false;
+    // A product called "smör 70%" is normally a spread/mix rather than ordinary butter.
+    const pct=(n.match(/(?:^|\s)(6[0-9]|7[0-4])%/)||[])[1];
+    if(pct) return false;
+    return /smor/.test(n) || /smor/.test(c);
+  }
+  if(q.includes("krossade") && q.includes("tomater")){
+    if(/tomatjuice|tomatpur[eé]|passerade|salsa|ketchup|juice|dryck/.test(n)) return false;
+    return (/tomat/.test(n) && /kross/.test(n)) || (/tomat/.test(c) && /kross/.test(c));
+  }
+  if(q.includes("entrecote")){
+    return /entrecote/.test(n);
+  }
+  return true;
+}
+function nameScore(query,product){
+  const q=words(query),p=words(product);if(!q.length)return 0;let hit=0;
+  for(const w of q){if(p.includes(w))hit++;else if(p.some(x=>x.startsWith(w)||w.startsWith(x)))hit+=.65}
+  let s=hit/q.length*70;if(normalize(product).includes(normalize(query)))s+=20;return Math.min(100,s)
+}
+function amountScore(wanted,p){
+  if(wanted==null)return 10;const got=productAmount(p);if(!Number.isFinite(got))return 0;const r=got/wanted;
+  if(Math.abs(r-1)<0.0001)return 20;if(r>=.8&&r<=1.25)return 16;if(r>=.6&&r<=1.5)return 11;if(r>=.4&&r<=2)return 5;return 0
+}
+function amountTier(item,p){
+  const wanted=grams(item.amount,item.unit),got=productAmount(p);if(wanted==null||got==null)return 1;const r=got/wanted;
+  if(Math.abs(r-1)<0.0001)return 4;if(r>=.8&&r<=1.25)return 3;if(r>=.6&&r<=1.5)return 2;if(r>=.4&&r<=2)return 1;return 0
+}
+function candidateScore(item,p){return productFamily(item,p)?nameScore(item.name,p.name)+amountScore(grams(item.amount,item.unit),p):-999}
+function candidatePrice(p){const z=p.prices||{};if(typeof z.regular==="number")return z.regular;if(typeof z.effective==="number")return z.effective;return null}
+function acceptable(item,p){
+  if(!productFamily(item,p) || amountTier(item,p)<=0)return false;
+  const q=normalize(item.name);
+  // For known product families, family + quantity is the important gate.
+  // This avoids losing real store matches merely because Primat ranked the name unusually.
+  if(/mjolk|smor|krossade tomater|entrecote/.test(q))return true;
+  return nameScore(item.name,p.name)>=25;
+}
+function betterCandidate(item,a,b){
+  if(!b)return true;
+  const ta=amountTier(item,a),tb=amountTier(item,b);if(ta!==tb)return ta>tb;
+  const sa=candidateScore(item,a),sb=candidateScore(item,b);if(sa!==sb)return sa>sb;
+  const pa=candidatePrice(a),pb=candidatePrice(b);
+  if(pa!==null&&pb!==null&&pa!==pb)return pa<pb;
+  return false;
+}
+
+async function loadStores(){
+try{
+ const c=JSON.parse(localStorage.getItem(STORE_CACHE)||"null");
+ if(c&&Date.now()-c.t<86400000)stores=c.d;
+ else{const r=await fetch(API+"/stores"),j=await r.json();if(!r.ok)throw Error(j?.detail?.message||"Kunde inte hämta butiker.");const all=j.data||j.stores||j||[];stores=all.filter(s=>[s.city,s.town,s.municipality,s.name,s.store_name,s.address,s.location?.city,s.location?.town].filter(Boolean).join(" ").toLowerCase().includes("karlstad")&&s.available!==false);localStorage.setItem(STORE_CACHE,JSON.stringify({t:Date.now(),d:stores}))}
+ if(!selected.length)selected=stores.map(storeKey);else selected=selected.filter(k=>stores.some(s=>storeKey(s)===k));saveStores();renderStores()
+}catch(e){$("stores").innerHTML=`<div class="error">${esc(e.message)}</div>`}
+}
+function renderStores(){$("stores").innerHTML=stores.map(s=>`<label class="store"><input type="checkbox" data-store="${esc(storeKey(s))}" ${selected.includes(storeKey(s))?"checked":""}><span><b>${esc(s.name||s.store_name||s.chain)}</b><small>${esc(s.address||"Karlstad")}</small></span></label>`).join("");document.querySelectorAll("[data-store]").forEach(x=>x.onchange=()=>{if(x.checked)selected=[...new Set([...selected,x.dataset.store])];else selected=selected.filter(k=>k!==x.dataset.store);saveStores();$("storeStatus").textContent=selected.length+" butiker valda."});$("storeStatus").textContent=selected.length+" butiker valda."}
+$("all").onclick=()=>{selected=stores.map(storeKey);saveStores();renderStores()};$("none").onclick=()=>{selected=[];saveStores();renderStores()};
+
+function addItem(){const name=$("name").value.trim(),amount=Number($("amount").value),unit=$("unit").value;if(name.length<2)return alert("Skriv vad du vill köpa.");if(!Number.isFinite(amount)||amount<=0)return alert("Ange en giltig mängd.");cart.push({id:crypto.randomUUID(),name,amount,unit,qty:1});saveCart();$("name").value="";$("amount").value="";$("suggestions").innerHTML=""}
+$("add").onclick=addItem;$("name").onkeydown=e=>{if(e.key==="Enter")addItem()};$("amount").onkeydown=e=>{if(e.key==="Enter")addItem()}
+function renderCart(){$("cart").innerHTML=cart.length?cart.map((x,i)=>`<div class="item"><div><b>${esc(x.name)}</b><small>${esc(x.amount)} ${esc(x.unit)} · antal ${x.qty}</small></div><div class="qty"><button onclick="changeQty(${i},-1)">−</button><span>${x.qty}</span><button onclick="changeQty(${i},1)">+</button></div><button class="remove" onclick="removeItem(${i})">×</button></div>`).join(""):'<div class="muted">Inga varor tillagda ännu.</div>'}
+function changeQty(i,d){cart[i].qty=Math.max(1,cart[i].qty+d);saveCart()}function removeItem(i){cart.splice(i,1);saveCart()}$("clear").onclick=()=>{cart=[];saveCart();$("results").classList.add("hidden")};
+
+async function preview(){
+ const name=$("name").value.trim(),amount=Number($("amount").value),unit=$("unit").value;if(name.length<2||!Number.isFinite(amount)||amount<=0||!selected.length)return;
+ $("suggestions").innerHTML='<div class="status">Kollar exempel på produkter…</div>';
+ try{const r=await fetch(`${API}/products?q=${encodeURIComponent(name)}&stores=${encodeURIComponent(selected.join(","))}&limit=200`),j=await r.json();if(!r.ok)throw Error(j?.detail?.message||"Kunde inte söka.");const data=j.data||[],byStore={};for(const p of data){const k=`${p.chain}:${p.store_id}`;if(!selected.includes(k))continue;const item={name,amount,unit},s=candidateScore(item,p);if(acceptable(item,p,s)&&(!byStore[k]||s>byStore[k].score))byStore[k]={p,score:s}}const ex=Object.values(byStore).sort((a,b)=>b.score-a.score).slice(0,5);$("suggestions").innerHTML=ex.length?`<div class="hint">Exempel – du behöver inte välja en av dem.</div>`+ex.map(x=>`<div class="suggest"><b>${esc(x.p.name)}</b><small>${esc(x.p.brand||"")}${x.p.package?" · "+esc(x.p.package):""} · ${typeof x.p.prices?.regular==="number"?money(x.p.prices.regular):"pris saknas"}</small></div>`).join(""):'<div class="status">Ingen tydlig förhandsmatchning. Du kan ändå lägga till varan.</div>'}catch(e){$("suggestions").innerHTML=`<div class="error">${esc(e.message)}</div>`}
+}
+$("name").onblur=preview;$("amount").onblur=preview;
+
+function choosePrice(p,member,qty){const z=p.prices||{};let u=typeof z.regular==="number"?z.regular:null,label="Ordinarie pris";if(member&&typeof z.member==="number"){u=z.member;label="Medlemspris"}if(qty>1&&z.multiprice?.price!=null&&Number(z.multiprice.quantity)<=qty){const v=Number(z.multiprice.price);if(u==null||v<u){u=v;label="Flerköpspris"}}if(member&&qty>1&&z.member_multiprice?.price!=null&&Number(z.member_multiprice.quantity)<=qty){const v=Number(z.member_multiprice.price);if(u==null||v<u){u=v;label="Medlemspris + flerpack"}}return u==null?null:{unit:u,total:u*qty,label}}
+
+async function compare(){
+ if(!cart.length)return alert("Lägg till minst en vara.");
+ if(!selected.length)return alert("Välj minst en butik.");
+ $("status").textContent="Söker efter produkter i alla valda butiker…";
+ $("results").classList.add("hidden");
+ try{
+  const member=$("member").checked;
+  const storeMap={};
+  stores.filter(s=>selected.includes(storeKey(s))).forEach(s=>storeMap[storeKey(s)]={name:s.name||s.store_name||s.chain,address:s.address||"",rows:[],total:0,ok:true});
+
+  // V12: använd inte /batch. Primat anger att /batch kräver Pro/Byrå.
+  // I stället gör vi riktade products-sökningar per butik och använder priset
+  // som redan finns i produktresultatet. Det gör att gratisnivån fungerar och
+  // att varje vald butik får en egen chans att hitta sina produkter.
+  for(let ii=0;ii<cart.length;ii++){
+    const item=cart[ii];
+    $("status").textContent=`Söker ${item.name} i alla ${selected.length} valda butiker (${ii+1}/${cart.length})…`;
+    const queries=searchQueries(item.name);
+
+    for(const k of Object.keys(storeMap)){
+      let best=null;
+      for(const q of queries){
+        try{
+          const r=await fetch(`${API}/products-store?q=${encodeURIComponent(q)}&stores=${encodeURIComponent(k)}&limit=100`);
+          const j=await r.json();
+          if(!r.ok)continue;
+          for(const p of (j.data||[])){
+            if(`${p.chain}:${p.store_id}`!==k)continue;
+            if(!acceptable(item,p))continue;
+            if(!best||betterCandidate(item,p,best.p))best={p};
+          }
+        }catch(_e){}
+      }
+      if(best)storeMap[k].rows.push({item,product:best.p});
+      else {storeMap[k].ok=false;storeMap[k].rows.push({item,missing:true});}
+    }
+  }
+
+  // Beräkna pris direkt från produktresultatet. Ingen batch krävs.
+  for(const k of Object.keys(storeMap)){
+    const box=storeMap[k];
+    for(const row of box.rows){
+      if(row.missing)continue;
+      const priced=choosePrice(row.product,member,row.item.qty);
+      if(!priced){row.missing=true;box.ok=false;continue;}
+      row.price=priced.total;row.label=priced.label;
+      const got=productAmount(row.product),wanted=grams(row.item.amount,row.item.unit);
+      row.matchText=(got!=null&&wanted!=null&&Math.abs(got-wanted)<1)?"Exakt mängd":(got!=null&&wanted!=null?`${row.product.package||row.product.amount+" "+row.product.unit} vald`:"Bra alternativ");
+      box.total+=priced.total;
+    }
+  }
+
+  const allResults=Object.values(storeMap),complete=allResults.filter(x=>x.ok).sort((a,b)=>a.total-b.total),incomplete=allResults.filter(x=>!x.ok);
+  if(!complete.length)throw Error("Ingen vald butik fick en komplett matchning. Försök med enklare produktnamn.");
+  $("best").textContent=money(complete[0].total);$("save").textContent=money(Math.max(0,complete.at(-1).total-complete[0].total));$("count").textContent=cart.reduce((n,x)=>n+x.qty,0);
+  const renderRow=r=>r.missing?`<div class="row"><span><b>${esc(r.item.name)} · ${esc(r.item.amount)} ${esc(r.item.unit)}</b><small class="warning">Ingen tillräckligt bra produktmatch hittades</small></span><strong>–</strong></div>`:`<div class="row"><span><b>${esc(r.item.name)} · ${esc(r.item.amount)} ${esc(r.item.unit)}</b><small>→ ${esc(r.product.name)}${r.product.brand?" · "+esc(r.product.brand):""}${r.product.package?" · "+esc(r.product.package):""}</small><div class="match">${esc(r.matchText)} · ${esc(r.label)}</div></span><strong>${money(r.price)}</strong></div>`;
+  const completeHtml=complete.map((s,i)=>`<div class="result ${i===0?"best":""}"><div class="rh"><div><h3>${i===0?"🏆 ":""}${esc(s.name)}</h3>${i===0?'<span class="badge">BILLIGASTE KOMPLETTA KASSEN</span>':''}</div><div class="price">${money(s.total)}</div></div><div class="rows">${s.rows.map(renderRow).join("")}</div></div>`).join("");
+  const incompleteHtml=incomplete.length?`<div class="card" style="margin-top:14px;border-style:dashed"><h2>Butiker med saknad vara</h2><div class="hint">Butiken är vald men en eller flera varor fick ingen säker produktmatch. Det betyder inte automatiskt att varan saknas.</div>${incomplete.map(s=>`<div class="result"><div class="rh"><div><h3>${esc(s.name)}</h3><div class="warning">${s.rows.filter(r=>r.missing).length} av ${cart.length} varor saknar säker match</div></div><div class="price">${money(s.total)}</div></div><div class="rows">${s.rows.map(renderRow).join("")}</div></div>`).join("")}</div>`:"";
+  $("list").innerHTML=completeHtml+incompleteHtml;$("results").classList.remove("hidden");
+  $("status").textContent=`Klart – ${complete.length} kompletta matkassar hittades. ${incomplete.length?incomplete.length+" butik(er) visas separat eftersom minst en vara saknar säker match.":"Alla valda butiker fick komplett matchning."}`;
+  window.scrollTo({top:$('results').offsetTop-10,behavior:'smooth'});
+ }catch(e){$("status").innerHTML=`<div class="error">${esc(e.message)}</div>`}
+}
+
+function searchQueries(name){
+ const n=normalize(name); const qs=[n];
+ const w=words(name); if(w.length>1)qs.push(w.join(" "));
+ if(n.includes("krossade tomater"))qs.push("krossade tomater","tomater krossade","tomatkross","krossade tomater 500 g");
+ if(n.includes("entrecote"))qs.push("entrecote","entrecôte","entrecote skivor","entrecote färsk");
+ if(n.includes("mjolk"))qs.push("mjölk","mjolk","standardmjölk","mellanmjölk","lättmjölk","mjölk 3%");
+ if(n.includes("smor"))qs.push("smör","smor","smör 80%","smör normalsaltat","smör osaltat");
+ return [...new Set(qs)].filter(Boolean);
+}
+$("compare").onclick=compare;$("member").checked=localStorage.getItem("matjakten-member")==="1";$("member").onchange=()=>localStorage.setItem("matjakten-member",$("member").checked?"1":"0");
+renderCart();loadStores();
+</script>
+</body>
+</html>
